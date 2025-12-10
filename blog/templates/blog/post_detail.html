@@ -1,0 +1,243 @@
+{% extends "blog/base.html" %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">文章详情</li>
+{% endblock %}
+
+{% block content %}
+<article>
+    <!-- 返回按钮 -->
+    <div class="mb-4">
+        <a href="{% url 'blog-home' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> 返回文章列表
+        </a>
+    </div>
+    
+    <!-- 文章标题区域 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="card-title mb-3">{{ post.title }}</h1>
+                    
+                    <!-- 作者信息 -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3" 
+                             style="width: 50px; height: 50px;">
+                            <span class="text-white fs-5">{{ post.author.username|first|upper }}</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ post.author.username }}</h6>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar"></i> {{ post.date_posted|date:"Y年m月d日 H:i" }}
+                                <span class="ms-3"><i class="bi bi-eye"></i> {{ post.views|default:0 }} 阅读</span>
+                                <span class="ms-3">
+                                    <i class="bi bi-chat"></i>
+                                    {% if comments %}
+                                        {{ comments|length }} 评论
+                                    {% else %}
+                                        {{ post.comments.count }} 评论
+                                    {% endif %}
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮（仅作者可见） -->
+                {% if user == post.author %}
+                    <div class="btn-group">
+                        <a href="{% url 'post-update' post.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-pencil"></i> 编辑
+                        </a>
+                        <a href="{% url 'post-delete' post.id %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i> 删除
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- 文章标签 -->
+            <div class="mb-4">
+                <span class="badge bg-primary me-1">技术</span>
+                <span class="badge bg-success me-1">教程</span>
+                <span class="badge bg-info me-1">Django</span>
+                <span class="badge bg-warning">Python</span>
+            </div>
+            
+            <!-- 文章内容 -->
+            <div class="post-content">
+                {{ post.content|linebreaks }}
+            </div>
+            
+            <!-- 分享按钮 -->
+            <div class="mt-4 pt-3 border-top">
+                <h6><i class="bi bi-share"></i> 分享这篇文章</h6>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-twitter"></i> Twitter
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-facebook"></i> Facebook
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-link-45deg"></i> 复制链接
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 评论区域 -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="bi bi-chat"></i>
+                评论 (
+                    {% if comments %}
+                        {{ comments|length }}
+                    {% else %}
+                        {{ post.comments.count }}
+                    {% endif %}
+                )
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- 评论表单 -->
+            {% if user.is_authenticated %}
+                <form method="POST" action="" class="mb-4">
+                    {% csrf_token %}
+
+                    {{ form.non_field_errors }}
+
+                    <div class="mb-3">
+                        {{ form.content.label_tag }}
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.content.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">提交评论</button>
+                </form>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> 请
+                    <a href="{% url 'login' %}" class="alert-link">登录</a>后发表评论
+                </div>
+            {% endif %}
+            
+            <!-- 评论列表 -->
+            <div class="comments-list">
+                {% for comment in comments %}
+                    <div class="comment-item mb-3">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px;">
+                                    <span class="text-white small">{{ comment.author.username|first|upper }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1">{{ comment.author.username }}</h6>
+                                    <small class="text-muted">{{ comment.date_posted|timesince }}前</small>
+                                </div>
+                                <p class="mb-1" style="white-space: pre-wrap;">{{ comment.content }}</p>
+                                <div>
+                                    <button class="btn btn-sm btn-link p-0 text-muted">回复</button>
+                                    <button class="btn btn-sm btn-link p-0 text-muted ms-2">点赞</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}
+                        <hr class="my-2">
+                    {% endif %}
+                {% empty %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-chat-text" style="font-size: 2rem; color: #6c757d;"></i>
+                        <p class="text-muted mt-2">还没有评论，快来抢沙发吧！</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- 相关文章 -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-newspaper"></i> 相关文章</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for related_post in post.author.post_set.all|slice:":3" %}
+                    {% if related_post.id != post.id %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <a href="{% url 'post-detail' related_post.id %}" class="text-decoration-none">
+                                            {{ related_post.title|truncatechars:50 }}
+                                        </a>
+                                    </h6>
+                                    <p class="card-text small">
+                                        {{ related_post.content|truncatechars:80 }}
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar"></i> {{ related_post.date_posted|date:"m月d日" }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="col-12 text-center py-3">
+                        <p class="text-muted">暂无相关文章</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</article>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .post-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #333;
+    }
+    
+    .post-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .post-content h2, .post-content h3 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .post-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    
+    .comment-item {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .comment-item:hover {
+        background-color: #e9ecef;
+    }
+</style>
+{% endblock %}

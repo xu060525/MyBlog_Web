@@ -1,0 +1,65 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card text-center shadow-lg border-0">
+            <div class="card-body py-5">
+                <!-- 成功图标 -->
+                <div class="mb-4">
+                    <div class="rounded-circle bg-success d-inline-flex align-items-center justify-content-center" 
+                         style="width: 100px; height: 100px;">
+                        <i class="bi bi-check-circle-fill text-white" style="font-size: 3rem;"></i>
+                    </div>
+                </div>
+                
+                <!-- 标题和消息 -->
+                <h1 class="card-title mb-3">👋 已成功退出登录</h1>
+                <p class="card-text text-muted mb-4">
+                    感谢你的访问！期待下次再见。
+                </p>
+                
+                <!-- 统计数据 -->
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-3">
+                                <h5 class="mb-0">登录时长</h5>
+                                <p class="mb-0 text-muted">约2小时</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-3">
+                                <h5 class="mb-0">上次登录</h5>
+                                <p class="mb-0 text-muted">刚刚</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="d-grid gap-3">
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> 重新登录
+                    </a>
+                    <a href="{% url 'blog-home' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-house"></i> 返回首页
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-plus"></i> 注册新账户
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 页脚信息 -->
+            <div class="card-footer bg-light py-3">
+                <small class="text-muted">
+                    安全提示：请确保在公共设备上退出登录，保护账户安全。
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends "blog/base.html" %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">注册</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-person-plus"></i> 创建新账户
+                </h3>
+                <p class="mb-0 mt-2 opacity-75">加入我们的博客社区</p>
+            </div>
+            
+            <div class="card-body p-5">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- 用户名字段 -->
+                    <div class="mb-4">
+                        <label for="{{ form.username.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-person"></i> 用户名
+                        </label>
+                        <input type="text" 
+                               name="username" 
+                               class="form-control form-control-lg {% if form.username.errors %}is-invalid{% endif %}"
+                               id="id_username"
+                               value="{{ form.username.value|default_if_none:'' }}"
+                               placeholder="请输入用户名"
+                               required
+                               autofocus>
+                        
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="form-text">
+                            <small>必填。150个字符以内。只能包含字母、数字和 @/./+/-/_</small>
+                        </div>
+                    </div>
+                    
+                    <!-- 密码字段 -->
+                    <div class="mb-4">
+                        <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-lock"></i> 密码
+                        </label>
+                        <input type="password" 
+                               name="password1" 
+                               class="form-control form-control-lg {% if form.password1.errors %}is-invalid{% endif %}"
+                               id="id_password1"
+                               placeholder="请输入密码"
+                               required>
+                        
+                        {% if form.password1.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password1.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- 确认密码字段 -->
+                    <div class="mb-4">
+                        <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-lock-fill"></i> 确认密码
+                        </label>
+                        <input type="password" 
+                               name="password2" 
+                               class="form-control form-control-lg {% if form.password2.errors %}is-invalid{% endif %}"
+                               id="id_password2"
+                               placeholder="请再次输入密码"
+                               required>
+                        
+                        {% if form.password2.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password2.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- 提交按钮 -->
+                    <div class="d-grid gap-2 mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-plus"></i> 立即注册
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- 已有账户提示 -->
+                <div class="text-center mt-4 pt-4 border-top">
+                    <p class="text-muted mb-2">已经有账户了？</p>
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-in-right"></i> 前往登录
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 密码要求提示 -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="bi bi-shield-check text-success"></i> 密码安全要求
+                </h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-1">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <small>密码不能与用户名太相似</small>
+                    </li>
+                    <li class="mb-1">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <small>至少包含8个字符</small>
+                    </li>
+                    <li class="mb-1">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <small>不能是常见密码</small>
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <small>不能完全是数字</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 实时密码强度检查
+    document.addEventListener('DOMContentLoaded', function() {
+        const password1 = document.getElementById('id_password1');
+        const password2 = document.getElementById('id_password2');
+        
+        function checkPasswordMatch() {
+            if (password1.value && password2.value) {
+                const passwordStrength = document.getElementById('password-strength');
+                
+                if (password1.value !== password2.value) {
+                    password2.classList.add('is-invalid');
+                    password2.classList.remove('is-valid');
+                    if (passwordStrength) {
+                        passwordStrength.innerHTML = '<span class="text-danger">两次输入的密码不一致</span>';
+                    }
+                } else {
+                    password2.classList.remove('is-invalid');
+                    password2.classList.add('is-valid');
+                    if (passwordStrength) {
+                        passwordStrength.innerHTML = '<span class="text-success">密码匹配</span>';
+                    }
+                }
+            }
+        }
+        
+        password1.addEventListener('input', checkPasswordMatch);
+        password2.addEventListener('input', checkPasswordMatch);
+        
+        // 密码强度检查
+        password1.addEventListener('input', function() {
+            const strengthBar = document.getElementById('password-strength-bar');
+            const strengthText = document.getElementById('password-strength-text');
+            
+            if (strengthBar && strengthText) {
+                const password = this.value;
+                let strength = 0;
+                let text = '';
+                
+                if (password.length >= 8) strength += 25;
+                if (/[A-Z]/.test(password)) strength += 25;
+                if (/[0-9]/.test(password)) strength += 25;
+                if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+                
+                strengthBar.style.width = strength + '%';
+                
+                if (strength < 50) {
+                    strengthBar.className = 'progress-bar bg-danger';
+                    text = '弱';
+                } else if (strength < 75) {
+                    strengthBar.className = 'progress-bar bg-warning';
+                    text = '中';
+                } else {
+                    strengthBar.className = 'progress-bar bg-success';
+                    text = '强';
+                }
+                
+                strengthText.textContent = `密码强度：${text}`;
+            }
+        });
+    });
+</script>
+{% endblock %}

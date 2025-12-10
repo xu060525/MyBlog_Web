@@ -1,0 +1,271 @@
+{% extends "blog/base.html" %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">个人资料</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 用户信息侧边栏 -->
+    <div class="col-lg-4">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body text-center">
+                <!-- 用户头像 -->
+                <div class="mb-4">
+                    <div class="user-avatar mx-auto" style="width: 150px; height: 150px;">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center h-100 w-100">
+                            <span class="text-white display-4">{{ user.username|first|upper }}</span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-camera"></i> 更换头像
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 用户基本信息 -->
+                <h2 class="card-title">{{ user.username }}</h2>
+                <p class="text-muted">
+                    <i class="bi bi-person-badge"></i> {{ user.get_full_name|default:"未设置姓名" }}
+                </p>
+                
+                <!-- 用户状态 -->
+                <div class="mb-3">
+                    {% if user.is_staff %}
+                        <span class="badge bg-warning">管理员</span>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <span class="badge bg-danger">超级管理员</span>
+                    {% endif %}
+                    <span class="badge bg-success">活跃用户</span>
+                </div>
+                
+                <!-- 用户统计 -->
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <h4 class="mb-0">{{ total_posts }}</h4>
+                        <small class="text-muted">文章</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="mb-0">{{ total_comments }}</h4>
+                        <small class="text-muted">评论</small>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> 编辑资料
+                    </a>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right"></i> 退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 账户信息卡片 -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> 账户信息</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>用户ID</span>
+                        <span class="text-muted">#{{ user.id }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>注册时间</span>
+                        <span class="text-muted">{{ user.date_joined|date:"Y年m月d日" }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>最后登录</span>
+                        <span class="text-muted">{{ user.last_login|date:"Y年m月d日 H:i" }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>邮箱</span>
+                        <span class="text-muted">{{ user.email|default:"未设置" }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主要内容区域 -->
+    <div class="col-lg-8">
+        <!-- 欢迎卡片 -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="card-title mb-1">欢迎回来，{{ user.username }}！</h4>
+                        <p class="text-muted mb-0">这是你的个人中心，可以管理你的文章和账户。</p>
+                    </div>
+                    <a href="{% url 'post-create' %}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> 发表新文章
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 我的文章 -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-journal-text"></i> 我的文章
+                    <span class="badge bg-primary ms-2">{{ posts|length }}</span>
+                </h5>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary">全部</button>
+                    <button class="btn btn-sm btn-outline-secondary">草稿</button>
+                    <button class="btn btn-sm btn-outline-secondary">已发布</button>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                {% if posts %}
+                    <div class="list-group list-group-flush">
+                        {% for post in posts %}
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div class="flex-grow-1 me-3">
+                                        <h6 class="mb-1">
+                                            <a href="#" class="text-decoration-none">{{ post.title }}</a>
+                                        </h6>
+                                        <p class="mb-1 text-muted small">
+                                            {{ post.content|truncatechars:120 }}
+                                        </p>
+                                        <div class="mt-2">
+                                            <small class="text-muted me-3">
+                                                <i class="bi bi-calendar"></i> {{ post.date_posted|date:"m月d日" }}
+                                            </small>
+                                            <small class="text-muted me-3">
+                                                <i class="bi bi-chat"></i> {{ post.comments.count }} 评论
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="bi bi-eye"></i> 0 阅读
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <div class="btn-group btn-group-sm mb-2">
+                                            <a href="#" class="btn btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-outline-secondary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                        <div>
+                                            {% if post.date_posted|date:"Ymd" == now|date:"Ymd" %}
+                                                <span class="badge bg-success">今天</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- 分页 -->
+                    <nav aria-label="文章分页" class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">上一页</a>
+                            </li>
+                            <li class="page-item active">
+                                <span class="page-link">1</span>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">2</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">3</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                {% else %}
+                    <!-- 没有文章时的显示 -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="bi bi-journal-x text-muted" style="font-size: 4rem;"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">还没有发表过文章</h4>
+                        <p class="text-muted mb-4">分享你的知识和想法，开始你的博客之旅吧！</p>
+                        <a href="{% url 'post-create' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-pencil-square"></i> 写第一篇文章
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- 最近活动 -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> 最近活动</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">登录账户</h6>
+                            <p class="text-muted small mb-0">刚刚 · 从 Chrome 浏览器</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">发表文章</h6>
+                            <p class="text-muted small mb-0">昨天 14:30 · "Django学习笔记"</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">评论文章</h6>
+                            <p class="text-muted small mb-0">前天 09:15 · "Python入门教程"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 20px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -20px;
+        top: 5px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    
+    .timeline-content {
+        padding-left: 10px;
+    }
+</style>
+{% endblock %}

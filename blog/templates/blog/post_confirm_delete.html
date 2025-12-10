@@ -1,0 +1,103 @@
+{% extends "blog/base.html" %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{% url 'blog-home' %}">首页</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'post-detail' object.id %}">{{ object.title|truncatechars:20 }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">删除文章</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow border-danger">
+            <div class="card-header bg-danger text-white text-center py-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> 确认删除
+                </h3>
+            </div>
+            
+            <div class="card-body p-5 text-center">
+                <!-- 警告图标 -->
+                <div class="mb-4">
+                    <div class="rounded-circle bg-danger d-inline-flex align-items-center justify-content-center" 
+                         style="width: 100px; height: 100px;">
+                        <i class="bi bi-trash text-white" style="font-size: 3rem;"></i>
+                    </div>
+                </div>
+                
+                <!-- 警告信息 -->
+                <h4 class="card-title text-danger mb-3">⚠️ 危险操作</h4>
+                <div class="alert alert-danger">
+                    <p class="mb-0">你确定要删除文章 <strong>"{{ object.title }}"</strong> 吗？</p>
+                </div>
+                
+                <p class="card-text text-muted">
+                    此操作<strong>无法撤销</strong>。文章的所有内容、评论和相关数据将被永久删除。
+                </p>
+                
+                <!-- 文章信息 -->
+                <div class="card mb-4">
+                    <div class="card-body text-start">
+                        <h6>文章信息</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>标题：</strong>{{ object.title }}</li>
+                            <li><strong>作者：</strong>{{ object.author.username }}</li>
+                            <li><strong>发布时间：</strong>{{ object.date_posted|date:"Y年m月d日 H:i" }}</li>
+                            <li><strong>评论数：</strong>{{ object.comments.count }}</li>
+                            <li><strong>阅读量：</strong>{{ object.views|default:0 }}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="bi bi-trash"></i> 确认删除
+                        </button>
+                        <a href="{% url 'post-detail' object.id %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-x-circle"></i> 取消并返回
+                        </a>
+                    </div>
+                </form>
+                
+                <!-- 额外警告 -->
+                <div class="mt-4 pt-3 border-top">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        删除后，这篇文章将从所有用户的视野中消失，无法恢复。
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 删除后果提醒 -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="bi bi-shield-exclamation"></i> 删除后果
+                </h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-x-circle text-danger me-2"></i>
+                        <small>文章将从数据库永久删除</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-x-circle text-danger me-2"></i>
+                        <small>所有评论将一并删除</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-x-circle text-danger me-2"></i>
+                        <small>文章的URL将返回404错误</small>
+                    </li>
+                    <li>
+                        <i class="bi bi-x-circle text-danger me-2"></i>
+                        <small>搜索引擎中的收录链接将失效</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

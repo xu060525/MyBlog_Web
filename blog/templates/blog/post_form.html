@@ -1,0 +1,187 @@
+{% extends "blog/base.html" %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{% url 'blog-home' %}">首页</a></li>
+    {% if object %}
+        <li class="breadcrumb-item"><a href="{% url 'post-detail' object.id %}">{{ object.title|truncatechars:20 }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">编辑文章</li>
+    {% else %}
+        <li class="breadcrumb-item active" aria-current="page">发表文章</li>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header {% if object %}bg-warning{% else %}bg-success{% endif %} text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-pencil-square"></i>
+                    {% if object %}
+                        编辑文章
+                    {% else %}
+                        发表新文章
+                    {% endif %}
+                </h4>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <!-- 标题字段 -->
+                    <div class="mb-4">
+                        <label for="id_title" class="form-label fw-bold">
+                            <i class="bi bi-card-heading"></i> 文章标题
+                        </label>
+                        <input type="text" 
+                               name="title" 
+                               class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}"
+                               id="id_title"
+                               value="{{ form.title.value|default_if_none:'' }}"
+                               placeholder="请输入文章标题"
+                               required
+                               autofocus>
+                        
+                        {% if form.title.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.title.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- 内容字段 -->
+                    <div class="mb-4">
+                        <label for="id_content" class="form-label fw-bold">
+                            <i class="bi bi-text-paragraph"></i> 文章内容
+                        </label>
+                        <textarea name="content" 
+                                  class="form-control {% if form.content.errors %}is-invalid{% endif %}"
+                                  id="id_content"
+                                  rows="15"
+                                  placeholder="请输入文章内容（支持Markdown格式）"
+                                  required>{{ form.content.value|default_if_none:'' }}</textarea>
+                        
+                        {% if form.content.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.content.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="form-text mt-2">
+                            <i class="bi bi-markdown"></i> 支持Markdown语法
+                        </div>
+                    </div>
+                    
+                    <!-- 预览区域 -->
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="preview-btn">
+                            <i class="bi bi-eye"></i> 预览
+                        </button>
+                        <div id="preview-content" class="mt-2 p-3 border rounded" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% if object %}{% url 'post-detail' object.id %}{% else %}{% url 'blog-home' %}{% endif %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> 取消
+                        </a>
+                        <button type="submit" class="btn {% if object %}btn-warning{% else %}btn-success{% endif %}">
+                            <i class="bi bi-check-circle"></i>
+                            {% if object %}
+                                更新文章
+                            {% else %}
+                                发表文章
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 写作提示 -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="bi bi-lightbulb"></i> 写作提示
+                </h6>
+                <ul class="mb-0">
+                    <li><small>标题要简洁明了，能概括文章主要内容</small></li>
+                    <li><small>内容要有条理，可以使用小标题和列表</small></li>
+                    <li><small>适当添加图片和代码示例会让文章更生动</small></li>
+                    <li><small>发布前请检查是否有错别字和语法错误</small></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 简单的Markdown预览
+    document.addEventListener('DOMContentLoaded', function() {
+        const previewBtn = document.getElementById('preview-btn');
+        const contentTextarea = document.getElementById('id_content');
+        const previewContent = document.getElementById('preview-content');
+        
+        previewBtn.addEventListener('click', function() {
+            const content = contentTextarea.value;
+            
+            // 简单的Markdown转换
+            let html = content
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                .replace(/`(.*)`/gim, '<code>$1</code>')
+                .replace(/\n\n/gim, '</p><p>')
+                .replace(/\n/gim, '<br>');
+            
+            previewContent.innerHTML = '<p>' + html + '</p>';
+            
+            if (previewContent.style.display === 'none') {
+                previewContent.style.display = 'block';
+                previewBtn.innerHTML = '<i class="bi bi-eye-slash"></i> 隐藏预览';
+            } else {
+                previewContent.style.display = 'none';
+                previewBtn.innerHTML = '<i class="bi bi-eye"></i> 预览';
+            }
+        });
+        
+        // 自动保存草稿（本地存储）
+        const saveDraft = function() {
+            const title = document.getElementById('id_title').value;
+            const content = contentTextarea.value;
+            
+            if (title || content) {
+                const draft = {
+                    title: title,
+                    content: content,
+                    time: new Date().toLocaleString()
+                };
+                localStorage.setItem('blog_draft', JSON.stringify(draft));
+            }
+        };
+        
+        // 每分钟自动保存
+        setInterval(saveDraft, 60000);
+        
+        // 页面加载时检查是否有草稿
+        const savedDraft = localStorage.getItem('blog_draft');
+        if (savedDraft && !contentTextarea.value) {
+            const draft = JSON.parse(savedDraft);
+            if (confirm('检测到未保存的草稿，是否加载？\n保存时间：' + draft.time)) {
+                document.getElementById('id_title').value = draft.title;
+                contentTextarea.value = draft.content;
+            }
+        }
+    });
+</script>
+{% endblock %}
