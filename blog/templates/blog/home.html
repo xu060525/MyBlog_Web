@@ -47,6 +47,26 @@
                                     <i class="bi bi-calendar"></i>
                                     {{ post.date_posted|date:"Y年m月d日 H:i" }}
                                 </span>
+
+                                {% if post.category %}
+                                    <span class="me-3">
+                                        <i class="bi bi-folder"></i>
+                                        {{ post.category.name }}
+                                    </span>
+                                {% endif %}
+
+                                {% if post.tags.all %}
+                                    <span class="me-3">
+                                        <i class="bi bi-tags"></i>
+                                        {% for tag in post.tags.all %}
+                                            {# 修正了这里的 class 写法 #}
+                                            <span class="badge bg-light text-muted border me-1">
+                                                {{ tag.name }}
+                                            </span>
+                                        {% endfor %}
+                                    </span>
+                                {% endif %}
+
                                 <span>
                                     <i class="bi bi-chat"></i>
                                     {{ post.comments.count }} 条评论
@@ -67,7 +87,7 @@
                                 </a>
 
                                 {% if user == post.author %}
-                                    <!-- 这里先预留编辑按钮，Day5 实现 CRUD 时再连上 URL -->
+                                    <!-- 预留编辑按钮 -->
                                     <a href="#" class="btn btn-outline-secondary btn-sm disabled" tabindex="-1" aria-disabled="true">
                                         <i class="bi bi-pencil me-1"></i> 编辑（待实现）
                                     </a>
@@ -264,6 +284,51 @@
                         <span class="badge bg-secondary rounded-pill">12</span>
                     </li>
                 </ul>
+            </div>
+        </div>
+
+        <!-- 分类列表 -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-folder me-1"></i> 文章分类
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for category in categories %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ category.name }}</span>
+                            <span class="badge bg-primary rounded-pill">
+                                {{ category.posts.count }}
+                            </span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">
+                            暂无分类
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- 标签云 -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-tags me-1"></i> 标签
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if tags %}
+                    {% for tag in tags %}
+                        <span class="badge bg-secondary me-1 mb-1">
+                            {{ tag.name }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted">暂无标签</span>
+                {% endif %}
             </div>
         </div>
 

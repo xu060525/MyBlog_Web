@@ -12,3 +12,6 @@ staticfiles/
 
 # VSCode
 .vscode/
+.vs/
+
+myblog/settings_local.py

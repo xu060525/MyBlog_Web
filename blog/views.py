@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.urls import reverse_lazy, reverse
 
-from .models import Post, Comment
+from .models import Post, Comment, Category, Tag
 from .forms import PostForm, CommentForm
 
 
@@ -52,19 +52,23 @@ def home(request):
 
     # 获取当前页的文章
     posts = page_obj.object_list
+    categories = Category.objects.all().order_by('name')
+    tags = Tag.objects.all().order_by('name')
 
     # 创建上下文数据（传递给模板的变量）
-    content = {
+    context = {
         'posts': posts, # 文章列表
         'page_obj': page_obj,
         'title': '博客首页',    # 页面标题
+        'categories': categories, 
+        'tags': tags, 
     }
 
     # render函数：渲染模板并返回响应
     # 参数1：request对象
     # 参数2：模板文件路径
     # 参数3：上下文数据
-    return render(request, 'blog/home.html', content)
+    return render(request, 'blog/home.html', context)
 
 def about(request):
     """

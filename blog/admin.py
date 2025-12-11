@@ -1,11 +1,24 @@
 from django.contrib import admin
-from .models import Post, Comment
+from .models import Post, Comment, Category, Tag
 
 # Register your models here.
 
 # 简单注册
 # admin.site.register(Post)
 # admin.site.register(Comment)
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'created_at')
+    search_fields = ('name', )
+    prepopulated_fields = {'slug': ('name', )}  # 输入name自动生成slug
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'created_at')
+    search_fields = ('name', )
+    prepopulated_fields = {'slug': ('name', )}  # 输入name自动生成slug
+
 
 # 装饰器注册
 @admin.register(Post)
@@ -16,13 +29,15 @@ class PostAdmin(admin.ModelAdmin):
     文章管理配置
     """
     # 列表页显示的字段
-    list_display = ('title', 'author', 'date_posted', 'comment_count')
+    list_display = ('title', 'author', 'category', 'date_posted', 'comment_count')
 
     # 右侧过滤器
-    list_filter = ('date_posted', 'author')
+    list_filter = ('category', 'tags', 'date_posted', 'author')
 
     # 搜索框
     search_fields = ('title', 'content')
+
+    filter_horizontal = ('tags', )
 
     # 日期层级导航
     date_hierarchy = 'date_posted'

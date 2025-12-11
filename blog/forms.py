@@ -1,11 +1,34 @@
 # blog/forms.py
 from django import forms
-from .models import Post, Comment
+from .models import Post, Comment, Category, Tag
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content']  # 在这里定义一次
+        fields = ['title', 'content', 'category', 'tags']  # 在这里定义一次
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '请输入文章标题', 
+            }), 
+            'content': forms.Textarea(attrs={
+                'class': 'form-control', 
+                'rows': 10, 
+                'placeholder': '请输入文章内容'
+            }), 
+            'category': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+            'tags': forms.SelectMultiple(attrs={
+                'class': 'form-select', 
+            }),
+        }
+        labels = {
+            'title': '标题',
+            'content': '正文内容',
+            'category': '分类', 
+            'tags': '标签', 
+        }
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

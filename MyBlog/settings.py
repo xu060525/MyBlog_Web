@@ -107,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'zh-hans'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Shanghai'
 
@@ -150,3 +150,9 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning', 
     messages.ERROR: 'danger',
 }
+
+# 尝试导入本地开发环境配置
+try:
+    from .settings_local import *
+except ImportError:
+    pass
